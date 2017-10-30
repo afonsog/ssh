@@ -33,7 +33,7 @@ fi
 
 #Creo el nuevo usuario
 adduser "$SSH_USER" -D
-echo $SSH_USER:$ROOT_PASSWORD | chpasswd
+echo $SSH_USER:$SSH_PASSWORD | chpasswd
 
 if [ -z "${SSH_ROOT_KEY}" ]; then
 	echo "=> Please pass your public key for ROOT in the SSH_ROOT_KEY environment variable"
