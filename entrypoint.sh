@@ -35,7 +35,7 @@ echo $SSH_USER:$SSH_PASSWORD | chpasswd
 chown root:$SSH_USER /home/$SSH_USER
 chmod 750 /home/$SSH_USER
 
-mkdir /home/$SSH_USER/public
+mkdir -p /home/$SSH_USER/public
 chown $SSH_USER: /home/$SSH_USER/public
 chmod 750 /home/$SSH_USER/public
 
