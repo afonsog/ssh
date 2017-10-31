@@ -6,7 +6,6 @@ function ssh_keys_to_user(){
   SSH_USER="$1"
   MYHOME="$2"
   SSH_KEY="$3"
-  echo "esto es el param 4: $4"
   echo "=> Adding SSH key to ${MYHOME}"
   mkdir -p ${MYHOME}/.ssh
   chmod go-rwx ${MYHOME}/.ssh
@@ -23,7 +22,6 @@ if [ -z "$ROOT_PASSWORD" ]; then
   exit 1
 fi
 
-#passwd root -d "$ROOT_PASSWORD"
 echo root:$ROOT_PASSWORD | chpasswd
 
 if [ -z "$SSH_USER" ] && [ -z "$SSH_PASSWORD" ]; then 
@@ -32,8 +30,23 @@ if [ -z "$SSH_USER" ] && [ -z "$SSH_PASSWORD" ]; then
 fi
 
 #Creo el nuevo usuario
-adduser "$SSH_USER" -D
+adduser "$SSH_USER" -D -s /bin/ash
 echo $SSH_USER:$SSH_PASSWORD | chpasswd
+chown root:$SSH_USER /home/$SSH_USER
+chmod 750 /home/$SSH_USER
+
+mkdir /home/$SSH_USER/public
+chown $SSH_USER: /home/$SSH_USER/public
+chmod 750 /home/$SSH_USER/public
+
+echo "Subsystem       sftp    internal-sftp
+
+Match User $SSH_USER
+    ChrootDirectory %h
+    AllowTCPForwarding no
+    X11Forwarding no
+    ForceCommand internal-sftp ">> /etc/ssh/sshd_config
+#Match User $SSH_USER
 
 if [ -z "${SSH_ROOT_KEY}" ]; then
 	echo "=> Please pass your public key for ROOT in the SSH_ROOT_KEY environment variable"
@@ -44,8 +57,6 @@ if [ ! -z "$SSH_USER_KEY" ]; then
   ssh_keys_to_user $SSH_USER "/home/$SSH_USER" "$SSH_USER_KEY"   #===> Acceso para el usuario creado
 fi
 
-echo "Antes de pasarla a la funcion"
-echo $SSH_ROOT_KEY
 ssh_keys_to_user "root" "/root" "$SSH_ROOT_KEY"   #===> Acceso como root
 
 
