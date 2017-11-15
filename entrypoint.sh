@@ -30,7 +30,7 @@ if [ -z "$SSH_USER" ] && [ -z "$SSH_PASSWORD" ]; then
 fi
 
 #Creo el nuevo usuario
-adduser "$SSH_USER" -D -s /bin/ash
+id -u "$SSH_USER" &>/dev/null || adduser "$SSH_USER" -D -s /bin/ash
 echo $SSH_USER:$SSH_PASSWORD | chpasswd
 chown root:$SSH_USER /home/$SSH_USER
 chmod 750 /home/$SSH_USER
