@@ -30,7 +30,8 @@ if [ -z "$SSH_USER" ] && [ -z "$SSH_PASSWORD" ]; then
 fi
 
 #Creo el nuevo usuario
-id -u "$SSH_USER" &>/dev/null || adduser "$SSH_USER" -D -s /bin/ash
+
+id -u $SSH_USER &>/dev/null || adduser "$SSH_USER" -D -s /bin/ash
 echo $SSH_USER:$SSH_PASSWORD | chpasswd
 chown root:$SSH_USER /home/$SSH_USER
 chmod 750 /home/$SSH_USER
@@ -39,14 +40,20 @@ mkdir -p /home/$SSH_USER/public
 chown $SSH_USER: /home/$SSH_USER/public
 chmod 750 /home/$SSH_USER/public
 
-echo "Subsystem       sftp    internal-sftp
+sed -ir 's&#Config-sftp&Subsystem	sftp	internal-sftp\
+Match User $SSH_USER\
+  ChrootDirectory %h\
+  AllowTCPForwarding no\
+  X11Forwarding no\
+  ForceCommand internal-sftpi&g' /etc/ssh/sshd_config
 
-Match User $SSH_USER
-    ChrootDirectory %h
-    AllowTCPForwarding no
-    X11Forwarding no
-    ForceCommand internal-sftp ">> /etc/ssh/sshd_config
+#echo "Subsystem       sftp    internal-sftp
+#
 #Match User $SSH_USER
+#    ChrootDirectory %h
+#    AllowTCPForwarding no
+#    X11Forwarding no
+#    ForceCommand internal-sftp ">> /etc/ssh/sftp_config
 
 if [ -z "${SSH_ROOT_KEY}" ]; then
 	echo "=> Please pass your public key for ROOT in the SSH_ROOT_KEY environment variable"
